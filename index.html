@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MKT.AI · AI 多平台营销内容助手</title>
+<meta name="description" content="一次输入产品 Brief，AI 自动生成可直接使用的多平台营销内容。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#181722;--muted:#7b788b;--line:#e9e7ef;--lavender:#7061f5;--purple:#5f49df;--bg:#f8f8fc;--panel:rgba(255,255,255,.92);--good:#3ccf93;--warn:#f0a93b;--bad:#ef6b6b;--radius:16px}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);min-height:100vh;overflow-x:hidden;font-family:Manrope,"Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+.orb{position:fixed;z-index:-1;width:520px;height:520px;border-radius:50%;filter:blur(90px);opacity:.22;pointer-events:none}
+.orb-one{top:-320px;left:8%;background:#a99dff}
+.orb-two{top:200px;right:-340px;background:#e4c9ff}
+.topbar{height:74px;display:flex;align-items:center;justify-content:space-between;max-width:1320px;padding:0 30px;margin:auto}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;color:var(--ink);letter-spacing:-1.2px;font-size:19px}
+.brand-mark{height:28px;width:28px;border-radius:9px;background:linear-gradient(135deg,#8377ff,#5540d3);color:#fff;display:grid;place-items:center;font-size:14px;letter-spacing:-2px;box-shadow:0 6px 14px #6556dc55}
+.dot{color:var(--lavender)}
+.header-right{font:500 10px "DM Mono",monospace;letter-spacing:1.3px;color:#9693a4;display:flex;align-items:center;gap:8px}
+.status-dot,.output-mode span{width:6px;height:6px;background:var(--good);border-radius:50%;box-shadow:0 0 0 3px #d9f6e9;display:inline-block}
+.header-slash{color:#d6d3df}
+.hero{text-align:center;padding:54px 20px 44px}
+.eyebrow{font:500 10px "DM Mono",monospace;letter-spacing:1.6px;color:#8074ee;margin:0 0 15px}
+.hero h1{font-size:clamp(32px,4.2vw,56px);letter-spacing:-3px;line-height:1.16;margin:0;font-weight:800}
+.hero h1 em{font-style:normal;color:#6b5af1}
+.hero-copy{font-size:14px;line-height:1.85;color:var(--muted);margin:20px auto 0;max-width:620px}
+.workspace{max-width:1240px;margin:0 auto 70px;display:grid;grid-template-columns:480px 1fr;gap:20px;padding:0 20px;align-items:start}
+.panel{background:var(--panel);border:1px solid #e9e8f0;border-radius:var(--radius);box-shadow:0 14px 40px #342a7210;backdrop-filter:blur(10px)}
+.input-panel{padding:26px}
+.results-panel{padding:26px;min-height:720px}
+.panel-heading{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px}
+.step{font:500 10px "DM Mono",monospace;letter-spacing:1.4px;color:#8074ee;margin:0 0 6px}
+.panel-heading h2{font-size:19px;margin:0;letter-spacing:-.5px}
+.case-button{background:#f1eeff;color:var(--purple);border:none;border-radius:9px;padding:8px 12px;font:600 12px "Noto Sans SC",sans-serif;cursor:pointer;transition:.18s;white-space:nowrap}
+.case-button:hover{background:#e6e0ff}
+label{display:block;font-size:12.5px;font-weight:600;color:#46435a;margin:16px 0 7px}
+label span{color:var(--bad)}
+input,textarea,select{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px 12px;font:400 13.5px "Noto Sans SC",sans-serif;color:var(--ink);background:#fff;transition:.18s;font-family:inherit}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--lavender);box-shadow:0 0 0 3px #6b5af125}
+textarea{resize:vertical;line-height:1.6}
+small{display:block;color:var(--muted);font-size:11.5px;margin-top:6px;line-height:1.6}
+.model-field label{margin-top:0}
+.model-select-wrap{position:relative}
+.model-note{display:block;font-size:11px;color:var(--muted);margin-top:6px}
+#modelProvider{padding-right:14px}
+fieldset{border:none;padding:0;margin:18px 0 0}
+legend{font-size:12.5px;font-weight:600;color:#46435a;padding:0;margin-bottom:9px;display:flex;align-items:center;gap:8px}
+.legend-note{font-weight:500;color:var(--muted);font-size:11px}
+.goal-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.choice{background:#fff;border:1px solid var(--line);border-radius:11px;padding:12px 13px;text-align:left;cursor:pointer;transition:.16s;font-family:inherit}
+.choice:hover{border-color:#cabfe8}
+.choice.selected{border-color:var(--lavender);background:#f6f3ff;box-shadow:0 0 0 3px #6b5af11c}
+.choice i{font-style:normal;color:var(--lavender);font-size:14px;display:block;margin-bottom:4px}
+.choice strong{display:block;font-size:13px;color:var(--ink)}
+.choice small{margin:2px 0 0;color:var(--muted);font-size:10.5px}
+.platform-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.platform{display:flex;flex-direction:column;align-items:center;gap:5px;padding:11px 4px;position:relative}
+.platform-icon{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;color:#fff;font-size:13px;font-weight:700}
+.platform-icon.red{background:#ff4d6d}.platform-icon.dark{background:#16161a}.platform-icon.orange{background:#ff8a1e}.platform-icon.green{background:#2bb673}.platform-icon.blue{background:#3b7cff}
+.platform b{font-size:11px;font-weight:600}
+.platform span{position:absolute;top:6px;right:6px;width:16px;height:16px;border-radius:50%;background:var(--lavender);color:#fff;font-size:10px;display:none;place-items:center}
+.platform.selected span{display:grid}
+.form-error{background:#fdeaea;color:#c23b3b;border:1px solid #f6cfcf;border-radius:10px;padding:10px 12px;font-size:12.5px;margin:14px 0 0}
+.input-invalid{border-color:#ef6b6b!important;box-shadow:0 0 0 3px #ef6b6b20!important}
+.generate-button{width:100%;margin-top:18px;background:linear-gradient(135deg,#7a6bff,#5f49df);color:#fff;border:none;border-radius:12px;padding:14px;font:700 14px "Noto Sans SC",sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;transition:.18s;box-shadow:0 10px 24px #5f49df40}
+.generate-button:hover{transform:translateY(-1px);box-shadow:0 14px 30px #5f49df55}
+.generate-button:disabled{opacity:.65;cursor:wait;transform:none}
+.generate-button kbd{font:500 10px "DM Mono",monospace;background:#ffffff30;border:1px solid #ffffff40;border-radius:5px;padding:2px 6px}
+.output-mode{font:500 10px "DM Mono",monospace;letter-spacing:1.2px;color:#9693a4;display:flex;align-items:center;gap:7px;background:#f4f3fa;border-radius:20px;padding:5px 11px}
+.empty-state{text-align:center;color:var(--muted);padding:90px 20px}
+.empty-art{display:flex;justify-content:center;gap:10px;font-size:22px;color:#c9c2ea;margin-bottom:18px}
+.empty-state h3{font-size:17px;color:#46435a;margin:0 0 8px}
+.empty-state p{font-size:13px;line-height:1.7;margin:0}
+.loading-state{text-align:center;padding:90px 20px}
+.loader{display:flex;justify-content:center;gap:7px;margin-bottom:20px}
+.loader i{width:10px;height:10px;border-radius:50%;background:var(--lavender);animation:bounce 1s infinite ease-in-out}
+.loader i:nth-child(2){animation-delay:.15s}.loader i:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,80%,100%{transform:scale(.5);opacity:.4}40%{transform:scale(1);opacity:1}}
+.loading-state p{font-size:15px;font-weight:600;color:#46435a;margin:0 0 6px}
+.loading-state small{display:block;text-align:center;font:500 10px "DM Mono",monospace;letter-spacing:1.5px;color:#a59ed0;margin:0}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.tab{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 13px;font:600 12.5px "Noto Sans SC",sans-serif;cursor:pointer;display:flex;align-items:center;gap:7px;transition:.16s}
+.tab span{font:500 10px "DM Mono",monospace;color:var(--muted)}
+.tab.active{border-color:var(--lavender);background:#f6f3ff;color:var(--purple)}
+.content-card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:20px 21px}
+.content-meta{display:flex;align-items:center;gap:9px;font-size:11px;color:var(--muted);margin-bottom:11px}
+.content-meta span:first-child{background:#f1eeff;color:var(--purple);border-radius:6px;padding:3px 9px;font-weight:600}
+.version-tag{margin-left:auto;background:#181722;color:#fff;border-radius:6px;padding:3px 9px;font:600 10px "DM Mono",monospace}
+.content-title{font-size:20px;letter-spacing:-.5px;margin:0 0 14px;line-height:1.35}
+.content-body{font-size:14px;line-height:1.85;color:#34313f}
+.content-body h4{font-size:14.5px;margin:16px 0 6px;color:var(--ink)}
+.content-body p{margin:0 0 11px}
+.hashtags{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}
+.hashtags span{background:#f4f3fa;color:#6b5af1;border-radius:7px;padding:5px 10px;font-size:12px}
+.insight{display:flex;gap:11px;background:#f6f3ff;border:1px solid #e6e0ff;border-radius:12px;padding:14px 16px;margin:16px 0}
+.insight>span{color:var(--lavender);font-size:15px}
+.insight b{font-size:12.5px;color:var(--purple);display:block;margin-bottom:3px}
+.insight p{margin:0;font-size:12.5px;line-height:1.7;color:#46435a}
+.score-section{margin:20px 0}
+.score-heading{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:13px}
+.score-heading h3{font-size:14px;margin:0}.score-heading span{font:500 10px "DM Mono",monospace;letter-spacing:1.2px;color:#a59ed0}
+.scores{display:grid;grid-template-columns:1fr 1fr;gap:13px 22px}
+.score>div:first-child{display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;color:#46435a}
+.score b{color:var(--ink);font-size:13px}
+.progress{height:7px;background:#eeeaf7;border-radius:6px;overflow:hidden}
+.progress i{display:block;height:100%;background:linear-gradient(90deg,#8a7bff,#5f49df);border-radius:6px;width:0;transition:width .7s cubic-bezier(.2,.8,.2,1)}
+.actions{display:flex;gap:11px;margin:20px 0 4px}
+.secondary-button{flex:1;background:#fff;border:1px solid var(--line);border-radius:11px;padding:12px;font:600 13px "Noto Sans SC",sans-serif;cursor:pointer;transition:.16s;color:#46435a}
+.secondary-button:hover{border-color:#cabfe8;background:#faf9ff}
+.optimise{margin-top:22px;border-top:1px solid var(--line);padding-top:18px}
+.optimise>p{font-size:13px;font-weight:600;margin:0 0 3px}
+.optimise>div>small{margin:0 0 12px}
+.optimise-chips{display:flex;gap:8px;flex-wrap:wrap}
+.optimise-chips button{background:#fff;border:1px solid var(--line);border-radius:20px;padding:7px 14px;font:500 12.5px "Noto Sans SC",sans-serif;cursor:pointer;transition:.16s;color:#46435a}
+.optimise-chips button:hover{border-color:#cabfe8}
+.optimise-chips button.active{background:var(--lavender);border-color:var(--lavender);color:#fff}
+.version-row{display:flex;align-items:center;gap:12px;margin-top:20px;flex-wrap:wrap}
+.version-row>span{font-size:12px;color:var(--muted);font-weight:600}
+#version-list{display:flex;gap:8px}
+.version-button{background:#fff;border:1px solid var(--line);border-radius:9px;padding:6px 12px;font:600 12px "DM Mono",monospace;cursor:pointer;color:#46435a;transition:.16s}
+.version-button.active{border-color:var(--lavender);background:#f6f3ff;color:var(--purple)}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);background:#181722;color:#fff;padding:12px 20px;border-radius:11px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:50;box-shadow:0 10px 30px #00000040}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.hint-bar{font-size:11.5px;color:var(--muted);text-align:center;margin:0 auto 26px;max-width:1240px;padding:0 20px}
+.hint-bar code{background:#efeafc;color:var(--purple);border-radius:5px;padding:2px 6px;font-family:"DM Mono",monospace;font-size:11px}
+@media(max-width:980px){.workspace{grid-template-columns:1fr}.results-panel{min-height:auto}.scores{grid-template-columns:1fr}}
+@media(max-width:560px){.platform-grid{grid-template-columns:repeat(3,1fr)}.topbar{padding:0 18px}.hero{padding:36px 16px 30px}}
+</style>
+</head>
+<body>
+<div class="orb orb-one"></div><div class="orb orb-two"></div>
+<header class="topbar">
+  <a class="brand" href="#"><span class="brand-mark">M</span><span>MKT<span class="dot">.</span>AI</span></a>
+  <div class="header-right"><span class="status-dot"></span><span id="header-status">OFFLINE DEMO</span><span class="header-slash">/</span><span>V1.0</span></div>
+</header>
+<main>
+  <section class="hero">
+    <p class="eyebrow">MULTI-PLATFORM CONTENT ENGINE</p>
+    <h1>让每一份产品信息<br><em>找到适合自己的表达方式。</em></h1>
+    <p class="hero-copy">一次输入产品 Brief，AI 自动理解用户、营销目标与平台内容逻辑，生成可直接使用的多平台营销内容。</p>
+  </section>
+  <p class="hint-bar" id="hint-bar">当前为<strong>离线演示模式</strong>：无需任何后端或密钥，打开即用。如需接入真实多模型，部署后端后访问 <code>?api=你的后端地址</code> 即可。</p>
+  <section class="workspace">
+    <form id="generator-form" class="panel input-panel">
+      <div class="panel-heading"><div><p class="step">01 · BRIEF</p><h2>创建内容任务</h2></div><button class="case-button" id="try-case-button" type="button">✦ 试用案例</button></div>
+      <div class="model-field"><label for="modelProvider">AI 模型 <span>*</span></label><div class="model-select-wrap"><select id="modelProvider" name="modelProvider" aria-label="AI 模型"><option value="demo">演示生成器（离线）</option></select><span class="model-note" id="model-note">内置离线生成器 · 打开即用</span></div></div>
+      <label>产品名称 <span>*</span><input id="productName" name="productName" value="Luma 智能运动手环" placeholder="例如：XX 智能手环"></label>
+      <label>核心卖点 <span>*</span><textarea id="sellingPoints" name="sellingPoints" rows="4" placeholder="每行一个卖点">14 天超长续航
+全天候健康监测
+100+ 运动模式
+轻薄无感设计</textarea><small>建议填写 3–5 个核心卖点，AI 会从中提炼表达重点。</small></label>
+      <label>目标人群 <span>*</span><input id="audience" name="audience" value="20–30 岁注重健康的城市职场人" placeholder="例如：20–30 岁女性、健身人群、职场新人"></label>
+      <fieldset><legend>营销目标 <span>*</span></legend><div class="goal-grid">
+        <button type="button" class="choice goal selected" data-goal="种草"><i>✦</i><strong>内容种草</strong><small>激发兴趣与认同</small></button>
+        <button type="button" class="choice goal" data-goal="转化"><i>↗</i><strong>提升转化</strong><small>推动行动与选择</small></button>
+        <button type="button" class="choice goal" data-goal="品牌传播"><i>◌</i><strong>品牌传播</strong><small>建立品牌认知</small></button>
+        <button type="button" class="choice goal" data-goal="活动推广"><i>◎</i><strong>活动推广</strong><small>传递活动信息</small></button>
+      </div></fieldset>
+      <fieldset><legend>选择发布平台 <span>*</span><span class="legend-note" id="select-count">已选 2 个</span></legend><div class="platform-grid">
+        <button type="button" class="choice platform selected" data-platform="小红书"><b class="platform-icon red">小</b>小红书<span>✓</span></button>
+        <button type="button" class="choice platform selected" data-platform="抖音"><b class="platform-icon dark">♪</b>抖音<span>✓</span></button>
+        <button type="button" class="choice platform" data-platform="微博"><b class="platform-icon orange">微</b>微博<span>✓</span></button>
+        <button type="button" class="choice platform" data-platform="公众号"><b class="platform-icon green">微</b>公众号<span>✓</span></button>
+        <button type="button" class="choice platform" data-platform="朋友圈"><b class="platform-icon blue">朋</b>朋友圈<span>✓</span></button>
+      </div><small>可同时选择多个平台，AI 将根据不同平台内容逻辑分别生成。</small></fieldset>
+      <p class="form-error hidden" id="form-error" role="alert"></p>
+      <button id="generate-button" class="generate-button" type="submit"><span class="spark">✦</span><span>生成营销内容</span><kbd>⌘ ↵</kbd></button>
+    </form>
+    <section class="panel results-panel" id="results-panel" aria-live="polite">
+      <div class="panel-heading"><div><p class="step">02 · OUTPUT</p><h2>AI 生成结果</h2></div><div class="output-mode" id="output-mode"><span></span>OFFLINE DEMO</div></div>
+      <div id="empty-state" class="empty-state"><div class="empty-art"><span>✦</span><span>✧</span><span>·</span></div><h3>等待一份好 Brief</h3><p>填写左侧信息并选择平台<br>AI 会在这里给出你的营销内容。</p></div>
+      <div id="loading-state" class="loading-state hidden"><div class="loader"><i></i><i></i><i></i></div><p id="loading-copy">正在分析产品卖点...</p><small id="loading-sub">PRODUCT × AUDIENCE × PLATFORM</small></div>
+      <div id="result-state" class="result-state hidden">
+        <div id="tabs" class="tabs"></div>
+        <article class="content-card"><div class="content-meta"><span id="content-platform">小红书</span><span>·</span><span id="content-subtitle"></span><span class="version-tag" id="version-tag">V1</span></div><h3 id="content-title"></h3><div class="content-body" id="content-body"></div><div class="hashtags" id="hashtags"></div></article>
+        <div class="insight"><span>✦</span><div><b>平台内容策略</b><p id="insight-text"></p></div></div>
+        <section class="score-section"><div class="score-heading"><h3>内容评分</h3><span>AI QUALITY CHECK</span></div><div id="scores" class="scores"></div></section>
+        <div class="actions"><button id="copy-button" class="secondary-button">⌘ <span>复制文案</span></button><button id="regenerate-button" class="secondary-button">↻ <span>重新生成</span></button></div>
+        <section class="optimise"><div><p>AI 内容优化</p><small>选择一个方向，让内容更贴近你的表达习惯</small></div><div class="optimise-chips" id="optimise-chips"><button data-optimization="更像真人">更像真人</button><button data-optimization="更有网感">更有网感</button><button data-optimization="更高级">更高级</button><button data-optimization="更有转化力">更有转化力</button><button data-optimization="减少AI感">减少 AI 感</button></div></section>
+        <div class="version-row"><span>内容版本</span><div id="version-list"></div></div>
+      </div>
+    </section>
+  </section>
+</main>
+<div class="toast" id="toast">已复制到剪贴板</div>
+
+<script>
+"use strict";
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => [...document.querySelectorAll(s)];
+
+const state = { goal:"种草", platforms:["小红书","抖音"], results:{}, activePlatform:"小红书", version:0, versions:[], viewingVersion:-1, optimization:null, providers:{}, apiBase:"" };
+const providerNames = { gpt:"GPT", deepseek:"DeepSeek", doubao:"豆包" };
+const trialCase = { productName:"Luma 智能运动手环", sellingPoints:"14 天超长续航\n全天候健康监测\n100+ 运动模式\n轻薄无感设计", audience:"20–30 岁注重健康的城市职场人" };
+const loadingMessages = ["正在分析产品卖点...","正在匹配目标用户...","正在适配平台内容策略...","正在生成平台内容..."];
+const loadingSubs = { "小红书":"XIAOHONGSHU · 真实体验逻辑", "抖音":"DOUYIN · 口播抓人逻辑", "微博":"WEIBO · 话题轻传播", "公众号":"WECHAT · 深度价值逻辑", "朋友圈":"MOMENTS · 朋友分享逻辑" };
+
+/* ---------- 离线生成器（与后端 mock_generator 同源逻辑，纯前端实现） ---------- */
+function hashStr(str){ let h = 2166136261; for (let i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+function makeRng(seed){ let s = seed >>> 0; return {
+  next(){ s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; },
+  int(a,b){ return Math.floor(this.next()*(b-a+1))+a; },
+  pick(arr){ return arr[Math.floor(this.next()*arr.length)]; }
+};}
+function parsePoints(v){ const vals = v.replace(/，/g,"\n").split("\n").map(x=>x.trim().replace(/^[•·\-—\s]+/,"")).filter(Boolean); return vals.length?vals:["好用、实用、有设计感"]; }
+
+function generateOffline(payload, platform, version, optimization){
+  const name = (payload.productName||"").trim() || "这款产品";
+  const audience = (payload.audience||"").trim() || "正在寻找更好选择的人";
+  const points = parsePoints(payload.sellingPoints);
+  const goal = payload.goal;
+  const rng = makeRng(hashStr([name, platform, String(version), optimization||""].join("|")));
+  const first = points[0], second = points[Math.min(1, points.length-1)];
+  const flavor = {
+    "更像真人":"像把最近的发现分享给朋友一样，", "更有网感":"这波真的很难不心动，",
+    "更高级":"少一点喧闹，多一点恰到好处，", "更有转化力":"如果你正在犹豫要不要入手，先看这一点：",
+    "减少AI感":"不用堆词，真正打动人的其实是细节："
+  }[optimization||""] || "";
+  const goalLine = {
+    "种草":"不是为了跟风，而是把日常里那些小麻烦，悄悄变得顺手。",
+    "转化":"适合把钱花在真实体验上的人：看得见的方便，才值得被选择。",
+    "品牌传播":"把产品做好，也是在把一种更从容的生活方式讲给更多人听。",
+    "活动推广":"把这次认识它的机会留给真正需要的人，体验比口号更有说服力。"
+  }[goal];
+  const T = {
+    "小红书":{
+      titles:[`最近被${name}悄悄圈粉了`, `${audience}，这次真的可以看看${name}`, `不是广告，${name}的这点很戳我`, `入坑${name}之后，我的日常轻松了`, `关于${name}，有些真心话想说`],
+      subtitle:"场景种草 · 真实体验",
+      body:`${flavor}最近用了${name}之后，才发现原来${first}可以这么省心。\n\n我是${audience}，一开始最在意的其实是它的${first}。实际用下来，${second}这个细节反而更惊喜——不是夸张的"改变生活"，而是在忙乱的时候，刚好帮你省下一点心力。\n\n${goalLine}\n\n如果你也在找一件能长期陪伴、而不是买回去吃灰的东西，可以把${name}放进备选清单。`,
+      tags:["#好物分享","#生活方式","#真实测评"],
+      insight:"从真实使用场景切入，降低广告感，再自然承接产品卖点。"
+    },
+    "抖音":{
+      titles:[`${audience}先别划走，${name}值得看`, `我为什么把${name}留在身边`, `${name}：一个容易被低估的选择`, `三秒讲清楚，为什么我选${name}`, `别急着划走，关于${name}的真相`],
+      subtitle:"短视频口播 · 前3秒抓人",
+      body:`【开场】如果你也在为"${first}"纠结，先别急着划走。\n\n【痛点】很多产品功能不少，但真正用起来总是差最后一点顺手。\n\n【发现】${name}让我记住的，是${first}，还有${second}这个细节。\n\n【价值】${goalLine}\n\n【结尾】想了解的朋友，可以从自己的日常需求开始判断：它是不是刚好能替你解决那个小问题。`,
+      tags:["#好物推荐","#日常好物","#真实体验"],
+      insight:"使用「痛点—发现—价值」口播结构，确保前三秒明确、后续有记忆点。"
+    },
+    "微博":{
+      titles:[`#把日常过得更顺一点# ${name}给了我一个答案`, `#好产品该是什么样# ${name}的一个小发现`, `#今日份好物# 为什么我想聊聊${name}`, `#生活灵感# ${name}藏着的巧思`],
+      subtitle:"话题表达 · 轻传播",
+      body:`${flavor}好产品不一定要大声证明自己。\n\n最近体验${name}，最有感的是${first}。对${audience}来说，${second}这种容易被忽略的细节，反而决定了会不会一直用下去。\n\n${goalLine}`,
+      tags:["#生活灵感","#产品观察","#好物分享"],
+      insight:"以可讨论的话题开场，用观点带出卖点，保留转发与互动空间。"
+    },
+    "公众号":{
+      titles:[`一件好产品，如何把日常变得更从容？`, `从${name}，看见那些真正被需要的细节`, `不止于${first}：${name}的价值是什么`, `我们为什么愿意为${name}买单`],
+      subtitle:"深度内容 · 价值解读",
+      body:`## 从一个小问题说起\n\n对${audience}而言，选择产品并不是追逐复杂功能，而是希望日常少一些不必要的消耗。\n\n## ${name}带来的改变\n\n${name}把重点放在${first}上，同时没有忽略${second}。这不是功能的简单罗列，而是对真实使用场景的回应。\n\n## 值得被选择的理由\n\n${goalLine}\n\n如果你也正在寻找一份更可靠、更贴近日常的体验，或许可以从${name}开始了解。`,
+      tags:["产品观察","生活方式","品牌故事"],
+      insight:"通过「问题—价值—选择理由」建立完整阅读逻辑，适合沉淀品牌认知。"
+    },
+    "朋友圈":{
+      titles:[`最近想分享一下${name}`, `一个让我觉得很顺手的小发现`, `用了一阵子，聊聊${name}`, `朋友圈安利：${name}真香`],
+      subtitle:"朋友分享 · 轻量推荐",
+      body:`最近在用${name}，想跟朋友们分享一下。\n\n本来是因为${first}关注到它，后来发现${second}这个细节也很用心。对${audience}来说，确实是那种越用越觉得顺手的存在。\n\n${goalLine}\n\n感兴趣可以来问我，不一定适合所有人，但也许刚好适合你。`,
+      tags:[],
+      insight:"保留朋友式表达与克制的推荐感，让产品信息自然出现。"
+    }
+  }[platform];
+  const scores = { platform:rng.int(89,96), selling_point:rng.int(86,94), appeal:rng.int(87,95), naturalness:rng.int(76,89) };
+  if (optimization) scores.naturalness = Math.min(96, scores.naturalness + 6);
+  return { title:rng.pick(T.titles), subtitle:T.subtitle, body:T.body, hashtags:T.tags, scores, insight:T.insight, version };
+}
+
+/* ---------- 真实后端模式（可选） ---------- */
+async function loadProviders(){
+  if (!state.apiBase) return;
+  try{
+    const r = await fetch(state.apiBase + "/api/providers"); const d = await r.json();
+    d.providers.forEach(p => state.providers[p.id] = p);
+    const sel = $("#modelProvider");
+    sel.innerHTML = '<option value="demo">演示生成器（离线）</option>' + d.providers.map(p=>{
+      const suffix = p.state==="configured" ? "" : p.state==="demo" ? " · 演示" : " · 未配置";
+      return `<option value="${p.id}">${p.label}${suffix}</option>`;
+    }).join("");
+    syncProviderUi();
+  }catch{ /* 后端不可达，保持离线 */ }
+}
+function syncProviderUi(){
+  const sel = $("#modelProvider").value; const cur = state.providers[sel];
+  if (state.apiBase && cur){ $("#model-note").textContent = cur.message || "模型状态未知"; }
+}
+
+/* ---------- UI 交互 ---------- */
+function getPayload(){
+  return { productName:$("#productName").value.trim(), sellingPoints:$("#sellingPoints").value.trim(),
+    audience:$("#audience").value.trim(), goal:state.goal, platforms:state.platforms,
+    provider:$("#modelProvider").value, version:state.version+1, optimization:state.optimization };
+}
+function updateCount(){ $("#select-count").textContent = `已选 ${state.platforms.length} 个`; }
+function showToast(m){ const t=$("#toast"); t.textContent=m; t.classList.add("show"); clearTimeout(showToast._t); showToast._t=setTimeout(()=>t.classList.remove("show"),2100); }
+function clearValidation(){ $("#form-error").classList.add("hidden"); $$(".input-invalid").forEach(i=>i.classList.remove("input-invalid")); }
+function showValidation(m, fields=[]){ $("#form-error").textContent=m; $("#form-error").classList.remove("hidden"); fields.forEach(id=>$(`#${id}`)?.classList.add("input-invalid")); }
+function validateBrief(p){
+  clearValidation();
+  const miss = [["productName","产品名称"],["sellingPoints","核心卖点"],["audience","目标人群"]].filter(([id])=>!p[id]);
+  if (miss.length){ showValidation(`请补充${miss.map(([,n])=>`「${n}」`).join("、")}后再生成。`, miss.map(([id])=>id)); return false; }
+  if (p.productName.length>60 || p.audience.length>100 || p.sellingPoints.length>800){ showValidation("产品信息过长，请精简后再生成（产品名称 60 字、目标人群 100 字、核心卖点 800 字以内）。"); return false; }
+  if (!p.platforms.length){ showValidation("请至少选择一个发布平台。"); return false; }
+  return true;
+}
+function setLoading(loading){
+  $("#empty-state").classList.toggle("hidden", loading || state.version>0);
+  $("#result-state").classList.toggle("hidden", loading || state.version===0);
+  $("#loading-state").classList.toggle("hidden", !loading);
+  $("#generate-button").disabled = loading;
+}
+function escapeHtml(v){ return v.replace(/[&<>'"]/g, c=>({ "&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;" }[c])); }
+function bodyToHtml(v){ return v.split("\n").map(l=> l.startsWith("## ") ? `<h4>${escapeHtml(l.slice(3))}</h4>` : `<p>${escapeHtml(l) || "&nbsp;"}</p>`).join(""); }
+function selectedResult(){ return state.results[state.activePlatform]; }
+function renderTabs(){
+  $("#tabs").innerHTML = state.platforms.map(p=>`<button class="tab ${p===state.activePlatform?"active":""}" data-tab="${p}">${p}<span>${state.results[p]?.scores.platform||""}</span></button>`).join("");
+  $$("#tabs button").forEach(b=>b.addEventListener("click",()=>{ state.activePlatform=b.dataset.tab; renderResult(); }));
+}
+function renderVersions(){
+  $("#version-list").innerHTML = state.versions.map((_,i)=>`<button class="version-button ${i===state.viewingVersion?"active":""}" data-version="${i}">V${i+1}</button>`).join("");
+  $$("#version-list button").forEach(b=>b.addEventListener("click",()=>{
+    state.viewingVersion = Number(b.dataset.version);
+    const a = state.versions[state.viewingVersion]; state.results = JSON.parse(JSON.stringify(a.results)); state.activePlatform = a.activePlatform; renderResult();
+  }));
+}
+function renderResult(){
+  const r = selectedResult(); if (!r) return;
+  renderTabs();
+  $("#content-platform").textContent = state.activePlatform;
+  $("#content-subtitle").textContent = r.subtitle;
+  $("#version-tag").textContent = `V${r.version}`;
+  $("#content-title").textContent = r.title;
+  $("#content-body").innerHTML = bodyToHtml(r.body);
+  $("#hashtags").innerHTML = (r.hashtags||[]).map(t=>`<span>${t}</span>`).join("");
+  $("#insight-text").textContent = r.insight;
+  const labels = [["platform","平台适配度"],["selling_point","卖点表达度"],["appeal","用户吸引力"],["naturalness","自然度"]];
+  $("#scores").innerHTML = labels.map(([k,lab])=>`<div class="score"><div><span>${lab}</span><b>${r.scores[k]}</b></div><div class="progress"><i data-w="${r.scores[k]}"></i></div></div>`).join("");
+  requestAnimationFrame(()=>$$("#scores .progress i").forEach(i=> i.style.width = i.dataset.w + "%"));
+  renderVersions();
+}
+
+async function generate({ optimization=null, keepOptimization=false } = {}){
+  const payload = getPayload(); payload.optimization = optimization;
+  state.optimization = keepOptimization ? optimization : null;
+  if (!validateBrief(payload)) return;
+  const provider = state.providers[payload.provider];
+  const prevPlatform = state.activePlatform;
+  setLoading(true);
+  let idx = 0; const timer = setInterval(()=>{ idx=(idx+1)%loadingMessages.length; $("#loading-copy").textContent=loadingMessages[idx]; }, 650);
+  $("#loading-sub").textContent = loadingSubs[state.activePlatform] || "PRODUCT × AUDIENCE × PLATFORM";
+  try{
+    let data;
+    if (state.apiBase && payload.provider !== "demo"){
+      const resp = await fetch(state.apiBase + "/api/generate", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload) });
+      data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || "生成失败，请再试一次");
+      if (data.provider_state === "unconfigured" || data.provider_state === "configured" && data.source !== "llm"){ /* fallthrough handled by source */ }
+    } else {
+      // 离线生成
+      const results = {};
+      for (const p of payload.platforms) results[p] = generateOffline(payload, p, payload.version, optimization);
+      data = { results, source:"demo", provider:"demo", provider_state:"demo" };
+    }
+    state.version += 1; state.results = data.results;
+    state.activePlatform = state.platforms.includes(prevPlatform) ? prevPlatform : state.platforms[0];
+    state.versions.push({ results:JSON.parse(JSON.stringify(data.results)), activePlatform:state.activePlatform });
+    state.viewingVersion = state.versions.length - 1;
+    const label = data.source === "llm" ? (providerNames[payload.provider]||payload.provider) + " · LIVE API" : "OFFLINE DEMO";
+    $("#output-mode").innerHTML = `<span></span>${label}`;
+    renderResult(); setLoading(false);
+  }catch(err){ setLoading(false); showToast(err.message || "生成失败，请再试一次"); }
+  finally{ clearInterval(timer); state.optimization = null; }
+}
+
+/* ---------- 事件绑定 ---------- */
+$$(".goal").forEach(b=>b.addEventListener("click",()=>{ $$(".goal").forEach(i=>i.classList.remove("selected")); b.classList.add("selected"); state.goal=b.dataset.goal; }));
+$$(".platform").forEach(b=>b.addEventListener("click",()=>{
+  const p=b.dataset.platform; const ex=state.platforms.includes(p);
+  if (ex && state.platforms.length===1){ showToast("至少保留一个发布平台"); return; }
+  state.platforms = ex ? state.platforms.filter(x=>x!==p) : [...state.platforms,p];
+  b.classList.toggle("selected", !ex); updateCount();
+}));
+$("#try-case-button").addEventListener("click",()=>{
+  Object.entries(trialCase).forEach(([id,v])=>{ $(`#${id}`).value=v; });
+  state.goal="种草"; $$(".goal").forEach(i=>i.classList.toggle("selected", i.dataset.goal==="种草"));
+  state.platforms=["小红书","抖音","微博","公众号","朋友圈"]; $$(".platform").forEach(i=>i.classList.add("selected")); updateCount(); clearValidation();
+  showToast("已填入试用案例：可直接生成 5 平台内容");
+});
+$("#modelProvider").addEventListener("change", syncProviderUi);
+$$("#productName,#sellingPoints,#audience").forEach(inp=>inp.addEventListener("input",()=>{ inp.classList.remove("input-invalid"); if (!$$(".input-invalid").length) $("#form-error").classList.add("hidden"); }));
+$("#generator-form").addEventListener("submit", e=>{ e.preventDefault(); generate(); });
+$("#regenerate-button").addEventListener("click", ()=>generate());
+$("#copy-button").addEventListener("click", async ()=>{
+  const it = selectedResult(); if (!it) return;
+  const text = [it.title, it.body, (it.hashtags||[]).join(" ")].filter(Boolean).join("\n\n");
+  try{ await navigator.clipboard.writeText(text); showToast("文案已复制到剪贴板"); }
+  catch{ const ta=document.createElement("textarea"); ta.value=text; document.body.appendChild(ta); ta.select(); try{document.execCommand("copy"); showToast("文案已复制到剪贴板");}catch{showToast("复制失败，请手动选择文案");} document.body.removeChild(ta); }
+});
+$("#optimise-chips").addEventListener("click", e=>{
+  const btn=e.target.closest("button"); if(!btn) return;
+  $$("#optimise-chips button").forEach(i=>i.classList.remove("active")); btn.classList.add("active");
+  generate({ optimization:btn.dataset.optimization, keepOptimization:true });
+});
+document.addEventListener("keydown", e=>{ if ((e.metaKey||e.ctrlKey) && e.key==="Enter"){ e.preventDefault(); $("#generator-form").requestSubmit(); } });
+
+/* ---------- 启动：检测 ?api= 参数，决定离线 / 真实后端 ---------- */
+(function init(){
+  const params = new URLSearchParams(location.search);
+  const api = params.get("api");
+  if (api){ state.apiBase = api.replace(/\/$/,""); $("#header-status").textContent="CONNECTED API"; $("#hint-bar").innerHTML = `已连接真实后端：<code>${state.apiBase}</code>。可在左侧切换 GPT / DeepSeek / 豆包 真实生成。`; loadProviders(); }
+  updateCount();
+})();
+</script>
+</body>
+</html>

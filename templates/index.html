@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MKT.AI · AI 多平台营销内容助手</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='enhancements.css') }}">
+</head>
+<body>
+  <div class="orb orb-one"></div><div class="orb orb-two"></div>
+  <header class="topbar"><a class="brand" href="#"><span class="brand-mark">M</span><span>MKT<span class="dot">.</span>AI</span></a><div class="header-right"><span class="status-dot"></span><span>AI READY</span><span class="header-slash">/</span><span>V1.0</span></div></header>
+  <main>
+    <section class="hero"><p class="eyebrow">MULTI-PLATFORM CONTENT ENGINE</p><h1>让每一份产品信息<br><em>找到适合自己的表达方式。</em></h1><p class="hero-copy">一次输入产品信息，AI 自动理解用户、营销目标与平台内容逻辑，<br>生成可直接使用的多平台营销内容。</p></section>
+    <section class="workspace">
+      <form id="generator-form" class="panel input-panel">
+        <div class="panel-heading"><div><p class="step">01 · BRIEF</p><h2>创建内容任务</h2></div><button class="case-button" id="try-case-button" type="button">✦ 试用案例</button></div>
+        <div class="model-field"><label for="modelProvider">AI 模型 <span>*</span></label><div class="model-select-wrap"><select id="modelProvider" name="modelProvider" aria-label="AI 模型"><option value="gpt">GPT</option><option value="deepseek">DeepSeek</option><option value="doubao">豆包</option></select><span id="model-note">正在检查模型配置…</span></div></div>
+        <label>产品名称 <span>*</span><input id="productName" name="productName" value="Luma 智能运动手环" placeholder="例如：XX 智能手环"></label>
+        <label>核心卖点 <span>*</span><textarea id="sellingPoints" name="sellingPoints" rows="4" placeholder="每行一个卖点">14 天超长续航
+全天候健康监测
+100+ 运动模式
+轻薄无感设计</textarea><small>建议填写 3–5 个核心卖点，AI 会从中提炼表达重点。</small></label>
+        <label>目标人群 <span>*</span><input id="audience" name="audience" value="20–30 岁注重健康的城市职场人" placeholder="例如：20–30 岁女性、健身人群、职场新人"></label>
+        <fieldset><legend>营销目标 <span>*</span></legend><div class="goal-grid">
+          <button type="button" class="choice goal selected" data-goal="种草"><i>✦</i><strong>内容种草</strong><small>激发兴趣与认同</small></button>
+          <button type="button" class="choice goal" data-goal="转化"><i>↗</i><strong>提升转化</strong><small>推动行动与选择</small></button>
+          <button type="button" class="choice goal" data-goal="品牌传播"><i>◌</i><strong>品牌传播</strong><small>建立品牌认知</small></button>
+          <button type="button" class="choice goal" data-goal="活动推广"><i>◎</i><strong>活动推广</strong><small>传递活动信息</small></button>
+        </div></fieldset>
+        <fieldset><legend>选择发布平台 <span>*</span><span class="select-count" id="select-count">已选 2 个</span></legend><div class="platform-grid">
+          <button type="button" class="choice platform selected" data-platform="小红书"><b class="platform-icon red">小</b>小红书<span>✓</span></button>
+          <button type="button" class="choice platform selected" data-platform="抖音"><b class="platform-icon dark">♪</b>抖音<span>✓</span></button>
+          <button type="button" class="choice platform" data-platform="微博"><b class="platform-icon orange">微</b>微博<span>✓</span></button>
+          <button type="button" class="choice platform" data-platform="公众号"><b class="platform-icon green">微</b>公众号<span>✓</span></button>
+          <button type="button" class="choice platform" data-platform="朋友圈"><b class="platform-icon blue">朋</b>朋友圈<span>✓</span></button>
+        </div><small>可同时选择多个平台，AI 将根据不同平台内容逻辑分别生成。</small></fieldset>
+        <p class="form-error hidden" id="form-error" role="alert"></p>
+        <button id="generate-button" class="generate-button" type="submit"><span class="spark">✦</span><span>生成营销内容</span><kbd>⌘ ↵</kbd></button>
+      </form>
+      <section class="panel results-panel" id="results-panel" aria-live="polite">
+        <div class="panel-heading"><div><p class="step">02 · OUTPUT</p><h2>AI 生成结果</h2></div><div class="output-mode"><span></span>MOCK MODE</div></div>
+        <div id="empty-state" class="empty-state"><div class="empty-art"><span>✦</span><span>✧</span><span>·</span></div><h3>等待一份好 Brief</h3><p>填写左侧信息并选择平台<br>AI 会在这里给出你的营销内容。</p></div>
+        <div id="loading-state" class="loading-state hidden"><div class="loader"><i></i><i></i><i></i></div><p id="loading-copy">正在分析产品卖点...</p><small>PRODUCT × AUDIENCE × PLATFORM</small></div>
+        <div id="result-state" class="result-state hidden">
+          <div id="tabs" class="tabs"></div>
+          <article class="content-card"><div class="content-meta"><span id="content-platform">小红书</span><span>·</span><span id="content-subtitle"></span><span class="version-tag" id="version-tag">V1</span></div><h3 id="content-title"></h3><div class="content-body" id="content-body"></div><div class="hashtags" id="hashtags"></div></article>
+          <div class="insight"><span>✦</span><div><b>平台内容策略</b><p id="insight-text"></p></div></div>
+          <section class="score-section"><div class="score-heading"><h3>内容评分</h3><span>AI QUALITY CHECK</span></div><div id="scores" class="scores"></div></section>
+          <div class="actions"><button id="copy-button" class="secondary-button">⌘ <span>复制文案</span></button><button id="regenerate-button" class="secondary-button">↻ <span>重新生成</span></button></div>
+          <section class="optimise"><div><p>AI 内容优化</p><small>选择一个方向，让内容更贴近你的表达习惯</small></div><div class="optimise-chips" id="optimise-chips"><button data-optimization="更像真人">更像真人</button><button data-optimization="更有网感">更有网感</button><button data-optimization="更高级">更高级</button><button data-optimization="更有转化力">更有转化力</button><button data-optimization="减少AI感">减少 AI 感</button></div></section>
+          <div class="version-row"><span>内容版本</span><div id="version-list"></div></div>
+        </div>
+      </section>
+    </section>
+  </main>
+  <div class="toast" id="toast">已复制到剪贴板</div>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body></html>

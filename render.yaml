@@ -1,0 +1,30 @@
+# Render.com 一键部署配置（免费版 Web Service）。
+# 用法：把本仓库推到 GitHub -> Render 新建 Blueprint -> 关联仓库即可。
+# 密钥请在 Render 控制台 Environment 中配置，不要写进仓库。
+services:
+  - type: web
+    name: mkt-ai
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -w 4 -k sync -b 0.0.0.0:$PORT server:app
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: HOST
+        value: 0.0.0.0
+      - key: FLASK_DEBUG
+        value: "0"
+      # 以下为可选的真实模型密钥；不填则对应模型走演示/未配置态，应用仍可正常演示。
+      - key: DOUBAO_API_KEY
+        sync: false
+      - key: DOUBAO_BASE_URL
+        sync: false
+      - key: DOUBAO_MODEL
+        sync: false
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: DEEPSEEK_BASE_URL
+        sync: false
+      - key: GPT_API_KEY
+        sync: false
