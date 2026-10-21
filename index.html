@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MKT.AI · AI 多平台营销内容助手</title>
 <meta name="description" content="一次输入产品 Brief，AI 自动生成可直接使用的多平台营销内容。">
+<meta property="og:title" content="MKT.AI · AI 多平台营销内容助手">
+<meta property="og:description" content="一次输入产品 Brief，AI 自动生成可直接使用的多平台营销内容。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://arden-hu.github.io/mkt-ai/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -128,7 +132,10 @@ legend{font-size:12.5px;font-weight:600;color:#46435a;padding:0;margin-bottom:9p
 .hint-bar{font-size:11.5px;color:var(--muted);text-align:center;margin:0 auto 26px;max-width:1240px;padding:0 20px}
 .hint-bar code{background:#efeafc;color:var(--purple);border-radius:5px;padding:2px 6px;font-family:"DM Mono",monospace;font-size:11px}
 @media(max-width:980px){.workspace{grid-template-columns:1fr}.results-panel{min-height:auto}.scores{grid-template-columns:1fr}}
-@media(max-width:560px){.platform-grid{grid-template-columns:repeat(3,1fr)}.topbar{padding:0 18px}.hero{padding:36px 16px 30px}}
+@media(max-width:560px){.platform-grid{grid-template-columns:repeat(3,1fr)}.topbar{padding:0 18px}.hero{padding:36px 16px 30px}.actions{flex-direction:column}}
+.site-footer{text-align:center;padding:6px 20px 42px;font-size:12px;color:var(--muted)}
+.site-footer a{color:var(--purple);text-decoration:none;margin-left:10px;font-weight:600}
+.site-footer a:hover{text-decoration:underline}
 </style>
 </head>
 <body>
@@ -179,13 +186,14 @@ legend{font-size:12.5px;font-weight:600;color:#46435a;padding:0;margin-bottom:9p
         <article class="content-card"><div class="content-meta"><span id="content-platform">小红书</span><span>·</span><span id="content-subtitle"></span><span class="version-tag" id="version-tag">V1</span></div><h3 id="content-title"></h3><div class="content-body" id="content-body"></div><div class="hashtags" id="hashtags"></div></article>
         <div class="insight"><span>✦</span><div><b>平台内容策略</b><p id="insight-text"></p></div></div>
         <section class="score-section"><div class="score-heading"><h3>内容评分</h3><span>AI QUALITY CHECK</span></div><div id="scores" class="scores"></div></section>
-        <div class="actions"><button id="copy-button" class="secondary-button">⌘ <span>复制文案</span></button><button id="regenerate-button" class="secondary-button">↻ <span>重新生成</span></button></div>
+        <div class="actions"><button id="copy-button" class="secondary-button">⌘ <span>复制文案</span></button><button id="copy-all-button" class="secondary-button">⤓ <span>复制全部平台</span></button><button id="regenerate-button" class="secondary-button">↻ <span>重新生成</span></button></div>
         <section class="optimise"><div><p>AI 内容优化</p><small>选择一个方向，让内容更贴近你的表达习惯</small></div><div class="optimise-chips" id="optimise-chips"><button data-optimization="更像真人">更像真人</button><button data-optimization="更有网感">更有网感</button><button data-optimization="更高级">更高级</button><button data-optimization="更有转化力">更有转化力</button><button data-optimization="减少AI感">减少 AI 感</button></div></section>
         <div class="version-row"><span>内容版本</span><div id="version-list"></div></div>
       </div>
     </section>
   </section>
 </main>
+<footer class="site-footer"><span>MKT.AI · 为产品经理求职作品打造</span><a href="https://github.com/Arden-hu/mkt-ai" target="_blank" rel="noopener">GitHub ↗</a></footer>
 <div class="toast" id="toast">已复制到剪贴板</div>
 
 <script>
@@ -392,11 +400,27 @@ $("#modelProvider").addEventListener("change", syncProviderUi);
 $$("#productName,#sellingPoints,#audience").forEach(inp=>inp.addEventListener("input",()=>{ inp.classList.remove("input-invalid"); if (!$$(".input-invalid").length) $("#form-error").classList.add("hidden"); }));
 $("#generator-form").addEventListener("submit", e=>{ e.preventDefault(); generate(); });
 $("#regenerate-button").addEventListener("click", ()=>generate());
-$("#copy-button").addEventListener("click", async ()=>{
+async function writeClipboard(text){
+  try{ await navigator.clipboard.writeText(text); showToast("文案已复制到剪贴板"); return; }catch{}
+  const ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed"; ta.style.opacity="0";
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand("copy") ? showToast("文案已复制到剪贴板") : showToast("复制失败，请手动选择文案"); }
+  catch{ showToast("复制失败，请手动选择文案"); }
+  document.body.removeChild(ta);
+}
+$("#copy-button").addEventListener("click", ()=>{
   const it = selectedResult(); if (!it) return;
-  const text = [it.title, it.body, (it.hashtags||[]).join(" ")].filter(Boolean).join("\n\n");
-  try{ await navigator.clipboard.writeText(text); showToast("文案已复制到剪贴板"); }
-  catch{ const ta=document.createElement("textarea"); ta.value=text; document.body.appendChild(ta); ta.select(); try{document.execCommand("copy"); showToast("文案已复制到剪贴板");}catch{showToast("复制失败，请手动选择文案");} document.body.removeChild(ta); }
+  writeClipboard([it.title, it.body, (it.hashtags||[]).join(" ")].filter(Boolean).join("\n\n"));
+});
+$("#copy-all-button").addEventListener("click", ()=>{
+  const parts = state.platforms.filter(p=>state.results[p]).map(p=>{
+    const r = state.results[p];
+    const block = [`【${p}】${r.title}`, r.body];
+    if (r.hashtags && r.hashtags.length) block.push(r.hashtags.join(" "));
+    return block.join("\n\n");
+  });
+  if (!parts.length){ showToast("请先生成内容"); return; }
+  writeClipboard(parts.join("\n\n————————————\n\n"));
 });
 $("#optimise-chips").addEventListener("click", e=>{
   const btn=e.target.closest("button"); if(!btn) return;
